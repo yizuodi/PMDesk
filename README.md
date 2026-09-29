@@ -87,6 +87,17 @@ CGO_ENABLED=0 go build .
 
 `build.sh` 产出本平台 `pmjira`，以及 Windows 控制台版和 GUI 版。
 
+### GitHub Releases
+
+向仓库推送形如 `v1.0.0` 的 Git tag 后，GitHub Actions 会自动运行测试和静态检查，并创建 Release。每个 Release 包含：
+
+- `pmdesk-linux-amd64`：Linux amd64 版
+- `pmdesk-windows-amd64.exe`：Windows amd64 控制台版
+- `pmdesk-windows-amd64-gui.exe`：Windows amd64 无控制台版
+- `SHA256SUMS.txt`：上述文件的 SHA-256 校验值
+
+Release 二进制页脚显示对应的 tag 版本号。工作流不会在普通分支推送时发布 Release。
+
 ### Windows
 
 ```bat
@@ -149,6 +160,7 @@ internal/web/                   HTTP 路由、处理器、模板和静态资源
   *_test.go                     Store、路由、认证、附件和 Markdown 测试
 build.sh / build.bat            本地和 Windows 构建脚本
 .github/workflows/ci.yml        GitHub Actions 持续集成
+.github/workflows/release.yml   按 v* tag 构建并发布 Release
 ```
 
 ## GitHub 开源仓库准备
@@ -159,8 +171,9 @@ build.sh / build.bat            本地和 Windows 构建脚本
 - `CONTRIBUTING.md`：开发、测试和迁移约定
 - `SECURITY.md`：本地部署与安全报告说明
 - `.github/workflows/ci.yml`：测试、vet 和无 CGO 构建
+- `.github/workflows/release.yml`：按 `v*` tag 构建 Linux/Windows 资产、生成校验和并发布 Release
 
-生成的 exe、数据库、配置、日志、附件和覆盖率文件不会纳入版本控制。创建 GitHub 仓库后，可再补充仓库地址、Issue 模板、Release 流程和截图。
+生成的 exe、数据库、配置、日志、附件和覆盖率文件不会纳入版本控制。Release 资产由 GitHub Actions 在推送版本 tag 后自动生成。
 
 ## 技术栈
 

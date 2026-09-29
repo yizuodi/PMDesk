@@ -10,8 +10,8 @@ import (
 	"pmjira/internal/store"
 )
 
-// AppVersion is shown in the footer.
-const AppVersion = "1.0.0"
+// AppVersion is shown in the footer and may be set at build time with -ldflags.
+var AppVersion = "dev"
 
 // Server wires the store and renderer to HTTP routes.
 type Server struct {
