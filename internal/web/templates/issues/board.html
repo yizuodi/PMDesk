@@ -1,0 +1,10 @@
+{{define "page"}}
+<div class="page-head">
+  <h1>看板</h1>
+  <div class="toolbar">
+    {{if .IsAdmin}}<span class="muted" style="font-size:12px">提示：拖拽卡片可在列之间移动</span>{{end}}
+    {{if .IsAdmin}}<a href="/issues/new" class="btn btn-primary btn-sm">+ 新建事务</a>{{end}}
+  </div>
+</div>
+{{template "board_grid" .}}
+{{end}}

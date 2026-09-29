@@ -1,0 +1,19 @@
+{{define "markdown_editor"}}
+<div class="field full markdown-editor" data-markdown-editor>
+  <label for="{{.ID}}">{{.Label}}</label>
+  <div class="markdown-editor-tabs" role="tablist" aria-label="{{.Label}}编辑方式">
+    <button type="button" class="markdown-editor-tab active" role="tab" aria-selected="true"
+            aria-controls="{{.ID}}-edit" data-markdown-tab="edit">编辑</button>
+    <button type="button" class="markdown-editor-tab" role="tab" aria-selected="false"
+            aria-controls="{{.ID}}-preview" data-markdown-tab="preview">预览</button>
+  </div>
+  <div id="{{.ID}}-edit" class="markdown-editor-panel" role="tabpanel" data-markdown-panel="edit">
+    <textarea id="{{.ID}}" name="{{.Name}}" placeholder="{{.Placeholder}}">{{.Value}}</textarea>
+  </div>
+  <div id="{{.ID}}-preview" class="markdown-editor-panel markdown-editor-preview" role="tabpanel"
+       data-markdown-panel="preview" hidden>
+    <div class="markdown-body" data-markdown-preview><div class="muted">暂无内容</div></div>
+  </div>
+  <div class="markdown-help">支持 Markdown：标题、列表、链接、代码块、表格、任务列表；图片请通过附件上传。</div>
+</div>
+{{end}}

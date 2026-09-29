@@ -1,0 +1,83 @@
+{{define "page"}}
+<div class="page-head">
+  <h1>人员速查</h1>
+  {{if .IsAdmin}}<div class="toolbar"><a href="/people/new" class="btn btn-primary btn-sm">+ 添加人员</a></div>{{end}}
+</div>
+
+<form class="filters" method="get" action="/people">
+  <input type="search" name="q" value="{{.FQ}}" placeholder="搜索姓名 / 工号 / 团队…" style="min-width:200px">
+  <label>团队
+  <select name="team">
+    <option value="">全部</option>
+    {{range .Teams}}<option value="{{.}}" {{if eq $.FTeam .}}selected{{end}}>{{.}}</option>{{end}}
+  </select></label>
+  <label>角色
+  <select name="role">
+    <option value="">全部</option>
+    {{range .AllRoles}}<option value="{{.}}" {{if eq $.FRole .}}selected{{end}}>{{.}}</option>{{end}}
+  </select></label>
+  <button class="btn btn-sm btn-primary" type="submit">筛选</button>
+  <a href="/people" class="btn btn-sm">重置</a>
+</form>
+
+<div class="card">
+  {{if .People}}
+  <table class="tbl">
+    <thead><tr><th style="width:120px">姓名</th><th style="width:120px">工号</th><th>角色</th><th style="width:140px">所属团队</th>{{if $.IsAdmin}}<th style="width:70px"></th>{{end}}</tr></thead>
+    <tbody>
+    {{range .People}}
+      <tr>
+        <td class="t-title">{{.Name}}</td>
+        <td><span class="parts">{{.EmployeeID}}</span></td>
+        <td>{{range .Roles}}<span class="badge role-tag">{{.}}</span> {{end}}</td>
+        <td>{{if .Team}}{{.Team}}{{else}}<span class="muted">—</span>{{end}}</td>
+        {{if $.IsAdmin}}<td><a href="/people/{{.ID}}/edit" class="btn btn-ghost btn-sm">编辑</a></td>{{end}}
+      </tr>
+    {{end}}
+    </tbody>
+  </table>
+  {{else}}<div class="empty">没有符合条件的人员。{{if $.IsAdmin}}<a href="/people/new">添加一个</a>{{end}}</div>{{end}}
+</div>
+
+<div class="card" style="margin-top:16px">
+  <div class="card-head"><h2>接口人列表</h2>{{if .IsAdmin}}<span class="muted">维护名称+网址+备注的超链接清单</span>{{end}}</div>
+  <div class="card-body">
+    {{if .Links}}
+    <table class="tbl">
+      <thead><tr><th style="width:160px">名称</th><th>网址</th><th>备注</th>{{if $.IsAdmin}}<th style="width:150px"></th>{{end}}</tr></thead>
+      <tbody>
+      {{range .Links}}
+        <tr>
+          <td class="t-title"><a href="{{.URL}}" target="_blank" rel="noopener">{{.Name}} ↗</a></td>
+          <td><span class="parts">{{.URL}}</span></td>
+          <td>{{if .Note}}{{.Note}}{{else}}<span class="muted">—</span>{{end}}</td>
+          {{if $.IsAdmin}}<td>
+            <form method="post" action="/people/contacts/{{.ID}}/update" style="display:flex;gap:6px;align-items:center">
+              <input type="text" name="name" value="{{.Name}}" style="width:90px;padding:4px 6px;border:1px solid var(--border-strong);border-radius:4px">
+              <input type="text" name="url" value="{{.URL}}" style="width:160px;padding:4px 6px;border:1px solid var(--border-strong);border-radius:4px">
+              <input type="text" name="note" value="{{.Note}}" placeholder="备注" style="width:90px;padding:4px 6px;border:1px solid var(--border-strong);border-radius:4px">
+              <button class="btn btn-sm" type="submit">保存</button>
+            </form>
+            <div style="display:flex;gap:4px;margin-top:4px">
+              <form method="post" action="/people/contacts/{{.ID}}/up" style="display:inline"><button class="btn btn-ghost btn-sm" title="上移">↑</button></form>
+              <form method="post" action="/people/contacts/{{.ID}}/down" style="display:inline"><button class="btn btn-ghost btn-sm" title="下移">↓</button></form>
+              <form method="post" action="/people/contacts/{{.ID}}/delete" style="display:inline" onsubmit="return confirm('删除链接「{{.Name}}」？')"><button class="btn btn-ghost btn-sm btn-danger" title="删除">✕</button></form>
+            </div>
+          </td>{{end}}
+        </tr>
+      {{end}}
+      </tbody>
+    </table>
+    {{else}}<div class="muted" style="font-size:13px;margin-bottom:12px">还没有接口人链接。</div>{{end}}
+
+    {{if .IsAdmin}}
+    <form method="post" action="/people/contacts" style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-top:12px">
+      <div class="field" style="margin:0"><label>名称</label><input type="text" name="name" placeholder="例如：X公司接口人" required></div>
+      <div class="field" style="margin:0;flex:1;min-width:200px"><label>网址</label><input type="text" name="url" placeholder="https://…" required></div>
+      <div class="field" style="margin:0"><label>备注</label><input type="text" name="note" placeholder="可选"></div>
+      <button type="submit" class="btn btn-primary">添加</button>
+    </form>
+    {{end}}
+  </div>
+</div>
+{{end}}

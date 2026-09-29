@@ -1,0 +1,110 @@
+{{define "page"}}
+{{$d := .Dash}}
+<div class="page-head">
+  <h1>仪表盘</h1>
+  <div class="toolbar">
+    <a href="/issues" class="btn btn-sm">事务列表</a>
+    <a href="/board" class="btn btn-sm">看板</a>
+    {{if .IsAdmin}}<a href="/issues/new" class="btn btn-sm btn-primary">+ 新建</a>{{end}}
+  </div>
+</div>
+
+<div class="grid grid-4" style="margin-bottom:16px">
+  <div class="card stat {{if gt $d.InProgress 0}}warn{{end}}">
+    <div class="num">{{$d.InProgress}}</div><div class="label">进行中</div>
+  </div>
+  <div class="card stat ok">
+    <div class="num">{{$d.Done}}</div><div class="label">已完成</div>
+  </div>
+  <div class="card stat {{if gt (len $d.Overdue) 0}}danger{{end}}">
+    <div class="num">{{len $d.Overdue}}</div><div class="label">已超期</div>
+  </div>
+  <div class="card stat">
+    <div class="num">{{$d.Total}}</div><div class="label">事务总数</div>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <div class="card-head"><h2>⚠ 超期提醒</h2><span class="muted">{{len $d.Overdue}} 项</span></div>
+    <div class="card-body">
+      {{if $d.Overdue}}
+      <ul class="list-bare">
+        {{range $d.Overdue}}<li class="mini-issue">
+          <a class="issue-key" href="/issues/{{.ID}}">{{.Key}}</a>
+          <a href="/issues/{{.ID}}">{{.Title}}</a>
+          {{template "due_tag" .DueDate}}
+        </li>{{end}}
+      </ul>
+      {{else}}<div class="muted">没有超期的事务 🎉</div>{{end}}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>⏰ 即将到期（3天内）</h2><span class="muted">{{len $d.DueSoon}} 项</span></div>
+    <div class="card-body">
+      {{if $d.DueSoon}}
+      <ul class="list-bare">
+        {{range $d.DueSoon}}<li class="mini-issue">
+          <a class="issue-key" href="/issues/{{.ID}}">{{.Key}}</a>
+          <a href="/issues/{{.ID}}">{{.Title}}</a>
+          {{template "due_tag" .DueDate}}
+        </li>{{end}}
+      </ul>
+      {{else}}<div class="muted">未来 3 天没有到期的事务</div>{{end}}
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-top:16px">
+  <div class="card">
+    <div class="card-head"><h2>事务分布</h2></div>
+    <div class="card-body">
+      {{$c := $d.CountsByStatus}}
+      <div class="grid grid-4" style="text-align:center">
+        <div><div class="num" style="font-size:22px;font-weight:700">{{index $c "todo"}}</div><div class="label">待办</div></div>
+        <div><div class="num" style="font-size:22px;font-weight:700">{{index $c "in_progress"}}</div><div class="label">进行中</div></div>
+        <div><div class="num" style="font-size:22px;font-weight:700">{{index $c "in_review"}}</div><div class="label">审核中</div></div>
+        <div><div class="num" style="font-size:22px;font-weight:700">{{index $c "done"}}</div><div class="label">已完成</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>最近更新</h2></div>
+    <div class="card-body">
+      {{if $d.RecentActivity}}
+      <ul class="list-bare">
+        {{range $d.RecentActivity}}<li class="mini-issue">
+          <a class="issue-key" href="/issues/{{.ID}}">{{.Key}}</a>
+          <a href="/issues/{{.ID}}">{{.Title}}</a>
+          <span class="badge {{statusClass .Status}}">{{statusLabel .Status}}</span>
+          <span class="muted">{{relTime .UpdatedAt}}</span>
+        </li>{{end}}
+      </ul>
+      {{else}}<div class="muted">还没有事务，<a href="/issues/new">新建第一个</a>。</div>{{end}}
+    </div>
+  </div>
+</div>
+
+{{if $d.UpcomingReleases}}
+<div class="card" style="margin-top:16px">
+  <div class="card-head"><h2>🚀 近期版本</h2><a href="/versions?view=roadmap">路线图</a></div>
+  <div class="card-body">
+    <div class="grid grid-3">
+      {{range $d.UpcomingReleases}}
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <a href="/versions/{{.ID}}" style="font-weight:600">{{.Name}}</a>
+          <span class="badge {{versionStatusClass .Status}}">{{versionStatusLabel .Status}}</span>
+        </div>
+        {{if .ReleaseDate}}<div class="muted" style="font-size:12px;margin-top:4px">计划发布：{{dateFmt .ReleaseDate}}</div>{{end}}
+        {{if (versionParts .)}}<div class="parts" style="margin-top:4px">{{versionParts .}}</div>{{end}}
+      </div>
+      {{end}}
+    </div>
+  </div>
+</div>
+{{end}}
+
+{{end}}

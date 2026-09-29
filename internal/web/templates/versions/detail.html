@@ -1,0 +1,39 @@
+{{define "page"}}
+{{$v := .V}}
+<div class="page-head">
+  <div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;flex-wrap:wrap">
+      <span class="badge {{vtypeClass $v.VType}}">{{vtypeLabel $v.VType}}</span>
+      <span class="badge {{versionStatusClass $v.Status}}">{{versionStatusLabel $v.Status}}</span>
+      {{if (versionParts $v)}}<span class="parts">{{versionParts $v}}</span>{{end}}
+      {{if $v.ReleaseDate}}<span class="muted">计划发布 {{dateFmt $v.ReleaseDate}}</span>{{end}}
+    </div>
+    <h1>{{$v.Name}}</h1>
+  </div>
+  <div class="toolbar">
+    {{if .IsAdmin}}
+    <a href="/versions/{{$v.ID}}/edit" class="btn btn-sm">编辑</a>
+    <form method="post" action="/versions/{{$v.ID}}/delete" style="display:inline" onsubmit="return confirm('删除版本 {{$v.Name}}？')">
+      <button class="btn btn-sm btn-danger">删除</button>
+    </form>
+    {{end}}
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div class="kv"><span class="k">状态</span><span class="badge {{versionStatusClass $v.Status}}">{{versionStatusLabel $v.Status}}</span></div>
+    <div class="kv"><span class="k">转测日期</span><span>{{if $v.StartDate}}{{dateFmt $v.StartDate}}{{else}}<span class="muted">未设定</span>{{end}}</span></div>
+    <div class="kv"><span class="k">发布日期</span><span>{{if $v.ReleaseDate}}{{dateFmt $v.ReleaseDate}}{{else}}<span class="muted">未排期</span>{{end}}</span></div>
+    <div class="kv"><span class="k">创建</span><span class="muted">{{relTime $v.CreatedAt}}</span></div>
+    <div class="kv"><span class="k">更新</span><span class="muted">{{relTime $v.UpdatedAt}}</span></div>
+  </div>
+</div>
+
+{{if $v.Description}}
+<div class="card" style="margin-top:16px">
+  <div class="card-head"><h2>说明</h2></div>
+  <div class="card-body"><div class="markdown-body">{{markdownHTML $v.Description}}</div></div>
+</div>
+{{end}}
+{{end}}

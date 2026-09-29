@@ -1,0 +1,86 @@
+{{define "page"}}
+{{$p := .Person}}
+<div class="page-head">
+  <h1>{{if .Editing}}编辑人员{{else}}添加人员{{end}}</h1>
+  <a href="/people" class="btn btn-sm">返回</a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="post" action="{{if .Editing}}/people/{{$p.ID}}{{else}}/people{{end}}">
+      <div class="form-grid">
+
+        <div class="field">
+          <label>姓名 *</label>
+          <input type="text" name="name" value="{{if .Editing}}{{$p.Name}}{{end}}" required autofocus>
+        </div>
+
+        <div class="field">
+          <label>工号</label>
+          <input type="text" name="employee_id" value="{{if .Editing}}{{$p.EmployeeID}}{{end}}" placeholder="可含字母，如 A1023">
+        </div>
+
+        <div class="field full">
+          <label>角色 <span class="muted" style="font-weight:400">（回车添加，点 × 删除）</span></label>
+          <div class="tag-editor" id="roleTags"></div>
+          <input type="hidden" name="roles" id="rolesInput" value="{{if .Editing}}{{range $i, $r := $p.Roles}}{{if $i}},{{end}}{{$r}}{{end}}{{end}}">
+        </div>
+
+        <div class="field">
+          <label>所属团队</label>
+          <input type="text" name="team" value="{{if .Editing}}{{$p.Team}}{{end}}" placeholder="例如：前端组">
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">{{if .Editing}}保存修改{{else}}添加人员{{end}}</button>
+        <a href="/people" class="btn">取消</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+(function(){
+  var initial = {{.RolesJSON}};
+  var box = document.getElementById('roleTags');
+  var hidden = document.getElementById('rolesInput');
+
+  function render(tags){
+    box.innerHTML = '';
+    tags.forEach(function(t, i){
+      var chip = document.createElement('span');
+      chip.className = 'tag-chip';
+      chip.textContent = t;
+      var x = document.createElement('button');
+      x.type = 'button';
+      x.className = 'tag-x';
+      x.textContent = '×';
+      x.setAttribute('aria-label', '删除');
+      x.onclick = function(){ tags.splice(i,1); sync(tags); render(tags); };
+      chip.appendChild(x);
+      box.appendChild(chip);
+    });
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'tag-input';
+    input.placeholder = '输入角色后回车…';
+    input.onkeydown = function(e){
+      if (e.key === 'Enter' || e.key === ','){
+        e.preventDefault();
+        var v = input.value.trim().replace(/,$/, '');
+        if (v && tags.indexOf(v) < 0){ tags.push(v); sync(tags); render(tags); }
+        else { input.value = ''; }
+      } else if (e.key === 'Backspace' && input.value === '' && tags.length){
+        tags.pop(); sync(tags); render(tags);
+      }
+    };
+    box.appendChild(input);
+    input.focus();
+  }
+  function sync(tags){ hidden.value = tags.join(','); }
+  render(initial.slice());
+})();
+</script>
+{{end}}

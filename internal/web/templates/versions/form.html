@@ -1,0 +1,75 @@
+{{define "page"}}
+{{$v := .V}}
+<div class="page-head">
+  <h1>{{if .Editing}}编辑版本{{else}}新建版本{{end}}</h1>
+  <a href="{{if .Editing}}/versions/{{$v.ID}}{{else}}/versions{{end}}" class="btn btn-sm">返回</a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="post" action="{{if .Editing}}/versions/{{$v.ID}}{{else}}/versions{{end}}">
+      <div class="form-grid">
+
+        <div class="field full">
+          <label>版本号 *</label>
+          <input type="text" name="name" id="vname" value="{{if .Editing}}{{$v.Name}}{{end}}"
+                 required autofocus oninput="vpParse(this.value)"
+                 placeholder="如 R027C10B003 / R027C00SPC200B020 / R027C00CP1022B010 / R27C10迭代0">
+          <div id="vp-feedback" class="muted" style="font-size:12px;margin-top:4px"></div>
+          <div class="muted" style="font-size:12px;margin-top:4px">
+            标准格式：<code>R###C##B###</code>（内部B）、<code>R###C##SPC###B###</code>（SPC 预发布）、<code>R###C##CP####B###</code>（CP 预发布）、<code>R###C##&lt;后缀&gt;</code>（关键节点，如 R27C10迭代0、R27C00TR5）。SPC/CP/关键节点自带 R/C，自动归入对应分组。非标准号也可保存，归为「其他」。
+          </div>
+        </div>
+
+        <div class="field">
+          <label>转测日期</label>
+          <input type="date" name="start_date" value="{{dateFmt $v.StartDate}}">
+        </div>
+
+        <div class="field">
+          <label>发布日期</label>
+          <input type="date" name="release_date" value="{{dateFmt $v.ReleaseDate}}">
+        </div>
+
+        <div class="field">
+          <label>状态</label>
+          <select name="status">
+            <option value="planned" {{if eq $v.Status "planned"}}selected{{end}}>已计划</option>
+            <option value="active" {{if eq $v.Status "active"}}selected{{end}}>进行中</option>
+            <option value="tested" {{if eq $v.Status "tested"}}selected{{end}}>已转测</option>
+            <option value="released" {{if eq $v.Status "released"}}selected{{end}}>已发布</option>
+          </select>
+        </div>
+
+        {{template "markdown_editor" (dict "ID" "version-description" "Name" "description" "Label" "说明" "Placeholder" "版本目标、范围、说明…" "Value" $v.Description)}}
+
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">{{if .Editing}}保存修改{{else}}创建版本{{end}}</button>
+        <a href="{{if .Editing}}/versions/{{$v.ID}}{{else}}/versions{{end}}" class="btn">取消</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function vpParse(s){
+  var fb = document.getElementById('vp-feedback');
+  s = (s || '').trim();
+  var u = s.toUpperCase();
+  var m;
+  if (m = u.match(/^R(\d+)C(\d+)SPC(\d+)B(\d+)$/)) { fb.innerHTML = '✓ 格式合法 · R'+m[1]+' · C'+m[2]+' · SPC'+m[3]+' · B'+m[4]+'（SPC 预发布）'; return; }
+  if (m = u.match(/^R(\d+)C(\d+)CP(\d+)B(\d+)$/))  { fb.innerHTML = '✓ 格式合法 · R'+m[1]+' · C'+m[2]+' · CP'+m[3]+' · B'+m[4]+'（CP 预发布）'; return; }
+  if (m = u.match(/^R(\d+)C(\d+)B(\d+)$/)) { fb.innerHTML = '✓ 格式合法 · R'+m[1]+' · C'+m[2]+' · B'+m[3]+'（内部B）'; return; }
+  // 关键节点：R##C## 后跟非数字开头的后缀（保留原大小写）
+  if (m = s.match(/^R(\d+)C(\d+)([A-Za-z一-龥].*)$/)) { fb.innerHTML = '✓ 格式合法 · R'+m[1]+' · C'+m[2]+' · '+m[3]+'（关键节点）'; return; }
+  if (m = u.match(/^R(\d+)C(\d+)$/)) { fb.innerHTML = '✓ 格式合法 · R'+m[1]+' · C'+m[2]; return; }
+  fb.innerHTML = s ? '⚠ 非标准格式，将保存为「其他」' : '';
+}
+document.addEventListener('DOMContentLoaded', function(){
+  var el = document.getElementById('vname');
+  if (el) vpParse(el.value);
+});
+</script>
+{{end}}

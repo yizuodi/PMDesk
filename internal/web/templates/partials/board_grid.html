@@ -1,0 +1,17 @@
+{{define "board_grid"}}
+<div class="board" id="board">
+  {{range .Statuses}}
+    {{$status := .}}
+    {{$items := index $.Columns $status}}
+    <div class="board-col" data-status="{{$status}}">
+      <div class="board-col-head">
+        <span><span class="badge {{statusClass $status}}">{{statusLabel $status}}</span></span>
+        <span class="count">{{len $items}}</span>
+      </div>
+      <div class="board-list" data-status="{{$status}}">
+        {{range $items}}{{template "issue_card" (dict "Issue" . "Admin" $.IsAdmin)}}{{end}}
+      </div>
+    </div>
+  {{end}}
+</div>
+{{end}}

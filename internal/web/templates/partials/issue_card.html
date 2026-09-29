@@ -1,0 +1,14 @@
+{{define "issue_card"}}
+{{$i := .Issue}}
+<div class="board-card {{if not .Admin}}no-drag{{end}}" draggable="{{if .Admin}}true{{else}}false{{end}}" data-issue="{{$i.ID}}">
+  <div class="bc-meta">
+    <a class="issue-key" href="/issues/{{$i.ID}}">{{$i.Key}}</a>
+    <span class="badge {{priorityClass $i.Priority}}">{{priorityLabel $i.Priority}}</span>
+  </div>
+  <div class="bc-title">{{$i.Title}}</div>
+  <div class="bc-meta">
+    {{template "due_tag" $i.DueDate}}
+    {{if gt $i.CommentCount 0}}<span class="muted">💬 {{$i.CommentCount}}</span>{{end}}
+  </div>
+</div>
+{{end}}

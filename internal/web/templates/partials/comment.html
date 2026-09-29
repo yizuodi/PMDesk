@@ -1,0 +1,15 @@
+{{define "comment"}}
+<div class="comment" id="comment-{{.C.ID}}">
+  <div class="c-meta">
+    {{relTime .C.CreatedAt}}
+    {{if .CanDelete}}
+    <form method="post" action="/comments/{{.C.ID}}/delete"
+          hx-post="/comments/{{.C.ID}}/delete" hx-target="#comment-{{.C.ID}}" hx-swap="delete"
+          style="display:inline" onsubmit="return confirm('删除这条评论?')">
+      <button class="btn btn-ghost btn-sm" type="submit">删除</button>
+    </form>
+    {{end}}
+  </div>
+  <div class="c-body">{{.C.Body}}</div>
+</div>
+{{end}}

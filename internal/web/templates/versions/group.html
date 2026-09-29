@@ -1,0 +1,51 @@
+{{define "page"}}
+<div class="page-head">
+  <h1>版本计划</h1>
+  <div class="toolbar">
+    <select class="view-switch" onchange="versionView(this.value)">
+      <option value="group" {{if eq .View "group"}}selected{{end}}>按版本分组</option>
+      <option value="flat" {{if eq .View "flat"}}selected{{end}}>平铺列表</option>
+      <option value="roadmap" {{if eq .View "roadmap"}}selected{{end}}>路线图</option>
+    </select>
+    {{if .IsAdmin}}<a href="/versions/new" class="btn btn-primary btn-sm">+ 新建版本</a>{{end}}
+  </div>
+</div>
+<div class="muted" style="font-size:12px;margin-bottom:8px">按 R 版本（年度）→ C 版本（半年度）分组；B 为内部开发版本，SPC/CP 为对外预发布，关键节点为里程碑。C 版本无需单独建立。</div>
+
+{{range .Groups}}
+<div class="tree-r">R{{printf "%03d" .R}}</div>
+{{range .CVersions}}
+<div class="tree-c">
+  <div class="tree-c-head">
+    <span class="badge vt-c">C{{printf "%02d" .C}}</span>
+    <span style="font-weight:700">R{{printf "%03d" .R}}C{{printf "%02d" .C}}</span>
+    <span class="muted" style="font-size:12px;margin-left:auto">{{len .Items}} 个版本</span>
+  </div>
+  <div class="tree-children">
+    {{range .Items}}
+    <div class="tree-child {{if eq .VType "SPC"}}spc{{else if eq .VType "CP"}}cp{{else if eq .VType "KEY"}}key{{end}}">
+      <span class="badge {{vtypeClass .VType}}">{{vtypeLabel .VType}}</span>
+      <a href="/versions/{{.ID}}" style="font-weight:600">{{.Name}}</a>
+      <span class="badge {{versionStatusClass .Status}}">{{versionStatusLabel .Status}}</span>
+      {{if .StartDate}}<span class="muted" style="font-size:12px">转测 {{dateFmt .StartDate}}</span>{{end}}
+      {{if .ReleaseDate}}<span class="muted" style="font-size:12px">发布 {{dateFmt .ReleaseDate}}</span>{{end}}
+    </div>
+    {{else}}
+    <div class="muted" style="font-size:13px;padding:4px 8px">（空）</div>
+    {{end}}
+  </div>
+</div>
+{{end}}
+{{else}}
+<div class="card"><div class="empty">还没有符合版本体系的版本。<br>新建一个版本，如 R027C10B003 / R027C00SPC200B020 / R27C10迭代0。<br><br>{{if .IsAdmin}}<a href="/versions/new" class="btn btn-primary btn-sm">+ 新建版本</a>{{end}}</div></div>
+{{end}}
+
+{{if .Legacy}}
+<div class="tree-r">其他 / 非标准</div>
+<div class="grid grid-2">
+{{range .Legacy}}
+<div class="card"><div class="card-head"><div><span class="badge vt-other">其他</span> <a href="/versions/{{.ID}}" style="font-weight:600">{{.Name}}</a></div></div></div>
+{{end}}
+</div>
+{{end}}
+{{end}}

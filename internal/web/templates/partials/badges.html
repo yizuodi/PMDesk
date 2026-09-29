@@ -1,0 +1,9 @@
+{{define "type_badge"}}<span class="badge {{typeClass .}}">{{typeLabel .}}</span>{{end}}
+{{define "status_badge"}}<span class="badge {{statusClass .}}">{{statusLabel .}}</span>{{end}}
+{{define "priority_badge"}}<span class="badge {{priorityClass .}}">{{priorityLabel .}}</span>{{end}}
+
+{{define "due_tag"}}
+  {{if .}}{{$l := dueLabel .}}{{if $l}}<span class="{{dueClass .}}">{{$l}}</span>{{end}}{{end}}
+{{end}}
+
+{{define "issue_key_link"}}<a class="issue-key" href="/issues/{{.ID}}">{{.Key}}</a>{{end}}

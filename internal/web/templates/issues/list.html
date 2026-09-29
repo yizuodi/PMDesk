@@ -1,0 +1,69 @@
+{{define "page"}}
+{{$f := .Filter}}
+<div class="page-head">
+  <h1>个人事务 <span class="muted">({{len .Issues}})</span></h1>
+  <div class="toolbar">
+    <a href="/issues/export.csv" onclick="this.href='/issues/export.csv'+location.search" class="btn btn-sm">⬇ 导出 CSV</a>
+    {{if .IsAdmin}}<a href="/issues/new" class="btn btn-primary btn-sm">+ 新建事务</a>{{end}}
+  </div>
+</div>
+
+<form class="filters" method="get" action="/issues">
+  <input type="search" name="q" value="{{$f.Search}}" placeholder="搜索 Key 或标题…" style="min-width:200px">
+
+  <label>状态
+  <select name="status">
+    <option value="">全部</option>
+    {{template "opt" (dict "Val" "todo" "Cur" $f.Status "Label" "待办")}}
+    {{template "opt" (dict "Val" "in_progress" "Cur" $f.Status "Label" "进行中")}}
+    {{template "opt" (dict "Val" "in_review" "Cur" $f.Status "Label" "审核中")}}
+    {{template "opt" (dict "Val" "done" "Cur" $f.Status "Label" "已完成")}}
+  </select></label>
+
+  <label>优先级
+  <select name="priority">
+    <option value="">全部</option>
+    {{template "opt" (dict "Val" "highest" "Cur" $f.Priority "Label" "最高")}}
+    {{template "opt" (dict "Val" "high" "Cur" $f.Priority "Label" "高")}}
+    {{template "opt" (dict "Val" "medium" "Cur" $f.Priority "Label" "中")}}
+    {{template "opt" (dict "Val" "low" "Cur" $f.Priority "Label" "低")}}
+    {{template "opt" (dict "Val" "lowest" "Cur" $f.Priority "Label" "最低")}}
+  </select></label>
+
+  <button class="btn btn-sm btn-primary" type="submit">筛选</button>
+  <a href="/issues" class="btn btn-sm">重置</a>
+</form>
+
+<div class="card">
+  {{if .Issues}}
+  <table class="tbl">
+    <thead><tr>
+      <th style="width:90px">Key</th><th>标题</th>
+      <th style="width:90px">状态</th><th style="width:80px">优先级</th>
+      <th style="width:140px">截止</th><th style="width:70px"></th>
+    </tr></thead>
+    <tbody>
+    {{range .Issues}}
+      <tr>
+        <td><a class="issue-key" href="/issues/{{.ID}}">{{.Key}}</a></td>
+        <td class="t-title"><a href="/issues/{{.ID}}" style="color:inherit">{{.Title}}</a>{{if gt .CommentCount 0}} <span class="muted">💬{{.CommentCount}}</span>{{end}}</td>
+        <td><span class="badge {{statusClass .Status}}">{{statusLabel .Status}}</span></td>
+        <td><span class="badge {{priorityClass .Priority}}">{{priorityLabel .Priority}}</span></td>
+        <td>
+          {{if .DueDate}}
+            <span class="row-due {{dueClass .DueDate}}">{{dateFmt .DueDate}}</span>
+            {{$l := dueLabel .DueDate}}{{if $l}}<div style="font-size:11px">{{$l}}</div>{{end}}
+          {{else}}<span class="muted">—</span>{{end}}
+        </td>
+        <td>{{if $.IsAdmin}}<a href="/issues/{{.ID}}/edit" class="btn btn-ghost btn-sm">编辑</a>{{else}}<span class="muted">—</span>{{end}}</td>
+      </tr>
+    {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <div class="empty">没有符合条件的事务。{{if $.IsAdmin}}<a href="/issues/new">新建一个</a>{{end}}</div>
+  {{end}}
+</div>
+{{end}}
+
+{{define "opt"}}<option value="{{.Val}}" {{if eq .Val .Cur}}selected{{end}}>{{.Label}}</option>{{end}}

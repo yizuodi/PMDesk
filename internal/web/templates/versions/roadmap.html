@@ -1,0 +1,37 @@
+{{define "page"}}
+<div class="page-head">
+  <h1>版本路线图</h1>
+  <div class="toolbar">
+    <select class="view-switch" onchange="versionView(this.value)">
+      <option value="group" {{if eq .View "group"}}selected{{end}}>按版本分组</option>
+      <option value="flat" {{if eq .View "flat"}}selected{{end}}>平铺列表</option>
+      <option value="roadmap" {{if eq .View "roadmap"}}selected{{end}}>路线图</option>
+    </select>
+    {{if .IsAdmin}}<a href="/versions/new" class="btn btn-primary btn-sm">+ 新建版本</a>{{end}}
+  </div>
+</div>
+
+{{if .Rows}}
+<div style="display:flex;flex-direction:column;gap:12px">
+  {{range .Rows}}
+  {{$v := .}}
+  <div class="card">
+    <div class="card-head">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span class="badge {{vtypeClass $v.VType}}">{{vtypeLabel $v.VType}}</span>
+        <a href="/versions/{{$v.ID}}" style="font-weight:600;font-size:15px">{{$v.Name}}</a>
+        <span class="badge {{versionStatusClass $v.Status}}">{{versionStatusLabel $v.Status}}</span>
+        {{if (versionParts $v)}}<span class="parts">{{versionParts $v}}</span>{{end}}
+      </div>
+      <span class="muted" style="font-size:12px">
+        {{if $v.StartDate}}转测 {{dateFmt $v.StartDate}}{{end}}{{if and $v.StartDate $v.ReleaseDate}} · {{end}}{{if $v.ReleaseDate}}发布 {{dateFmt $v.ReleaseDate}}{{end}}
+      </span>
+    </div>
+    {{if $v.Description}}<div class="card-body"><div class="markdown-body">{{markdownHTML $v.Description}}</div></div>{{end}}
+  </div>
+  {{end}}
+</div>
+{{else}}
+<div class="card"><div class="empty">还没有版本。{{if .IsAdmin}}<a href="/versions/new">新建一个</a>{{end}}</div></div>
+{{end}}
+{{end}}

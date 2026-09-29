@@ -1,0 +1,19 @@
+{{define "page"}}
+{{$l := .Link}}
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+  <div class="muted" style="font-size:13px">内嵌页面：<b>{{$l.Title}}</b> · {{$l.URL}}</div>
+  <div class="toolbar">
+    <a href="{{$l.URL}}" target="_blank" rel="noopener" class="btn btn-sm">在新窗口打开 ↗</a>
+    <a href="/" class="btn btn-sm">返回首页</a>
+  </div>
+</div>
+<div class="card" style="padding:0;overflow:hidden">
+  <iframe src="{{$l.URL}}" title="{{$l.Title}}"
+    style="width:100%;height:calc(100vh - 180px);border:0;display:block;background:#fff"
+    referrerpolicy="no-referrer" allow="fullscreen"
+    onload="document.getElementById('iframe-hint').style.display='none'"></iframe>
+</div>
+<div id="iframe-hint" class="muted" style="font-size:12px;margin-top:8px">
+  提示：部分网站（如 Google、GitHub）会禁止被 iframe 内嵌。若页面空白，请改用「新窗口打开」，或把该链接的打开方式设为「新窗口」。
+</div>
+{{end}}

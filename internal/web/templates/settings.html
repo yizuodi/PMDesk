@@ -1,0 +1,104 @@
+{{define "page"}}
+<div class="page-head"><h1>项目设置</h1></div>
+
+<div class="card" style="max-width:640px;margin-bottom:16px">
+  <div class="card-head"><h2>服务</h2></div>
+  <div class="card-body">
+    <form method="post" action="/shutdown" onsubmit="return confirm('确认停止 PM Jira 服务？停止后需要重新启动程序。')" style="display:inline">
+      <button class="btn btn-danger">⏻ 停止服务</button>
+    </form>
+    <div class="muted" style="font-size:12px;margin-top:8px">无控制台版本（pmjira-gui.exe）可通过此按钮退出；控制台版本也可直接关闭窗口或按 Ctrl+C。</div>
+  </div>
+</div>
+<div class="card" style="max-width:640px">
+  <div class="card-head"><h2>基本信息</h2></div>
+  <div class="card-body">
+    <form method="post" action="/settings">
+      <div class="field" style="margin-bottom:16px">
+        <label>项目名称</label>
+        <input type="text" name="name" value="{{.P.Name}}" required>
+      </div>
+      <div class="field" style="margin-bottom:16px">
+        <label>事务 Key 前缀（用于生成 PM-1、PM-2 …）</label>
+        <input type="text" name="key" value="{{.P.Key}}" maxlength="6" required>
+        <div class="muted" style="font-size:12px;margin-top:4px">仅限大写字母/数字，最多 6 位。已创建事务的 Key 不会改变。</div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">保存设置</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card" style="max-width:640px;margin-top:16px">
+  <div class="card-head"><h2>数据</h2></div>
+  <div class="card-body">
+    <div class="muted" style="font-size:13px;line-height:1.7">
+      数据保存在程序同目录下的 SQLite 数据库文件中。<br>
+      已创建事务：<b>{{.P.IssueSeq}}</b> 个（下一个 Key 为 {{.P.Key}}-{{inc .P.IssueSeq}}）。<br>
+      建议定期备份数据库文件。
+    </div>
+  </div>
+</div>
+
+<div class="card" style="max-width:760px;margin-top:16px">
+  <div class="card-head"><h2>快捷导航</h2><span class="muted">添加常用网页，可内嵌或新窗口打开</span></div>
+  <div class="card-body">
+    <form method="post" action="/settings/nav" style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px">
+      <div class="field" style="flex:1;min-width:120px;margin:0">
+        <label>标题</label>
+        <input type="text" name="title" placeholder="例如：Wiki" required>
+      </div>
+      <div class="field" style="flex:2;min-width:200px;margin:0">
+        <label>网址</label>
+        <input type="text" name="url" placeholder="https://…" required>
+      </div>
+      <div class="field" style="margin:0">
+        <label>分类</label>
+        <input type="text" name="category" placeholder="留空=直接显示" list="nav-cat-list">
+      </div>
+      <div class="field" style="margin:0">
+        <label>打开方式</label>
+        <select name="mode">
+          <option value="newtab">新窗口打开</option>
+          <option value="iframe">页面内嵌</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">添加</button>
+    </form>
+    <datalist id="nav-cat-list">{{range .NavCats}}<option value="{{.Cat}}">{{end}}</datalist>
+
+    {{if .NavLinks}}
+    {{range .NavLinks}}
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--border)">
+      <form method="post" action="/settings/nav/{{.ID}}/update" style="display:flex;gap:6px;align-items:center;flex:1;min-width:260px;flex-wrap:wrap">
+        <input type="text" name="title" value="{{.Title}}" style="width:110px;padding:5px 8px;border:1px solid var(--border-strong);border-radius:4px">
+        <input type="text" name="url" value="{{.URL}}" style="flex:1;min-width:140px;padding:5px 8px;border:1px solid var(--border-strong);border-radius:4px">
+        <input type="text" name="category" value="{{.Category}}" placeholder="分类" list="nav-cat-list" style="width:100px;padding:5px 8px;border:1px solid var(--border-strong);border-radius:4px">
+        <select name="mode" style="padding:5px 8px;border:1px solid var(--border-strong);border-radius:4px">
+          <option value="newtab" {{if eq .Mode "newtab"}}selected{{end}}>新窗口</option>
+          <option value="iframe" {{if eq .Mode "iframe"}}selected{{end}}>内嵌</option>
+        </select>
+        <button type="submit" class="btn btn-sm">保存</button>
+      </form>
+      <div style="display:flex;gap:4px">
+        <form method="post" action="/settings/nav/{{.ID}}/up" style="display:inline"><button class="btn btn-ghost btn-sm" title="上移">↑</button></form>
+        <form method="post" action="/settings/nav/{{.ID}}/down" style="display:inline"><button class="btn btn-ghost btn-sm" title="下移">↓</button></form>
+        {{if eq .Mode "iframe"}}<a href="/nav/{{.ID}}" class="btn btn-ghost btn-sm" title="预览">▶</a>{{else}}<a href="{{.URL}}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" title="打开">▶</a>{{end}}
+        <form method="post" action="/settings/nav/{{.ID}}/delete" style="display:inline" onsubmit="return confirm('删除导航「{{.Title}}」？')">
+          <button class="btn btn-ghost btn-sm btn-danger" title="删除">✕</button>
+        </form>
+      </div>
+    </div>
+    {{end}}
+    {{else}}
+    <div class="muted" style="font-size:13px">还没有快捷导航。在上方添加一个试试。</div>
+    {{end}}
+    <div class="muted" style="font-size:12px;margin-top:12px;line-height:1.6">
+      说明：「页面内嵌」会在本站内以 iframe 展示该网址；「新窗口打开」会在浏览器新标签页打开。<br>
+      「分类」填写后，同类的链接会在顶栏聚合成一个可悬停展开的菜单；留空则直接显示在顶栏。
+      由于浏览器安全限制，部分网站（Google、GitHub 等）禁止被内嵌，建议对这类网站使用「新窗口打开」。
+    </div>
+  </div>
+</div>
+{{end}}

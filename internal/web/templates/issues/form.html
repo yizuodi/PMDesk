@@ -1,0 +1,55 @@
+{{define "page"}}
+{{$c := .Cur}}
+<div class="page-head">
+  <h1>{{if .Editing}}编辑事务{{else}}新建事务{{end}}</h1>
+  <a href="{{if .Editing}}/issues/{{.Issue.ID}}{{else}}/issues{{end}}" class="btn btn-sm">返回</a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="post" action="{{if .Editing}}/issues/{{.Issue.ID}}{{else}}/issues{{end}}">
+      <div class="form-grid">
+
+        <div class="field full">
+          <label>标题 *</label>
+          <input type="text" name="title" value="{{if .Editing}}{{.Issue.Title}}{{end}}" required autofocus placeholder="一句话描述这个事务">
+        </div>
+
+        {{template "markdown_editor" (dict "ID" "issue-description" "Name" "description" "Label" "描述" "Placeholder" "详细说明、验收标准、依赖等…" "Value" .Issue.Description)}}
+
+        <div class="field">
+          <label>状态</label>
+          <select name="status">
+            <option value="todo" {{template "sel" (dict "Val" "todo" "Cur" $c.status)}}>待办</option>
+            <option value="in_progress" {{template "sel" (dict "Val" "in_progress" "Cur" $c.status)}}>进行中</option>
+            <option value="in_review" {{template "sel" (dict "Val" "in_review" "Cur" $c.status)}}>审核中</option>
+            <option value="done" {{template "sel" (dict "Val" "done" "Cur" $c.status)}}>已完成</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>优先级</label>
+          <select name="priority">
+            <option value="highest" {{template "sel" (dict "Val" "highest" "Cur" $c.priority)}}>最高</option>
+            <option value="high" {{template "sel" (dict "Val" "high" "Cur" $c.priority)}}>高</option>
+            <option value="medium" {{template "sel" (dict "Val" "medium" "Cur" $c.priority)}}>中</option>
+            <option value="low" {{template "sel" (dict "Val" "low" "Cur" $c.priority)}}>低</option>
+            <option value="lowest" {{template "sel" (dict "Val" "lowest" "Cur" $c.priority)}}>最低</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>截止日期</label>
+          <input type="date" name="due_date" value="{{$c.due_date}}">
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">{{if .Editing}}保存修改{{else}}创建事务{{end}}</button>
+        <a href="{{if .Editing}}/issues/{{.Issue.ID}}{{else}}/issues{{end}}" class="btn">取消</a>
+      </div>
+    </form>
+  </div>
+</div>
+{{end}}

@@ -1,0 +1,54 @@
+{{define "attachments"}}
+<div id="attachments">
+  {{if .Attachments}}
+  <div style="display:flex;flex-direction:column;gap:10px">
+    {{range .Attachments}}
+    <div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--border)">
+      {{if isImage .Filename}}
+        <a href="/attachments/{{.ID}}/view" target="_blank" rel="noopener" class="thumb" title="点击查看大图">
+          <img src="/attachments/{{.ID}}/view" alt="{{.Filename}}" loading="lazy"
+               data-lightbox onclick="event.preventDefault(); openLightbox(this.href)">
+        </a>
+      {{else if isPDF .Filename}}
+        <div class="thumb thumb-doc" title="PDF">PDF</div>
+      {{else}}
+        <div class="thumb thumb-doc" title="文件">📎</div>
+      {{end}}
+
+      <div style="flex:1;min-width:160px">
+        <div>
+          <a href="/attachments/{{.ID}}">📄 {{.Filename}}</a>
+        </div>
+        <div class="muted" style="font-size:12px;margin-top:2px">{{humanSize .Size}} · {{relTime .CreatedAt}}</div>
+      </div>
+
+      <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
+        {{if isImage .Filename}}
+          <a href="/attachments/{{.ID}}/view" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" title="查看大图">👁 查看</a>
+        {{else if isPDF .Filename}}
+          <a href="/attachments/{{.ID}}/view" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" title="预览 PDF">👁 预览</a>
+        {{end}}
+        {{if $.IsAdmin}}
+        <form method="post" action="/attachments/{{.ID}}/delete" style="display:inline" onsubmit="return confirm('删除附件 {{.Filename}}？')">
+          <button class="btn btn-ghost btn-sm btn-danger" title="删除">✕</button>
+        </form>
+        {{end}}
+      </div>
+    </div>
+    {{end}}
+  </div>
+  {{else}}
+  <div class="muted" style="font-size:13px">暂无附件</div>
+  {{end}}
+
+  {{if .IsAdmin}}
+  <form hx-post="/issues/{{.IssueID}}/attachments" hx-target="#attachments" hx-swap="outerHTML"
+        hx-encoding="multipart/form-data" hx-on::after-request="if(event.detail.successful) this.reset()"
+        enctype="multipart/form-data" style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap">
+    <input type="file" name="file" required>
+    <button type="submit" class="btn btn-sm btn-primary">上传</button>
+    <span class="muted" style="font-size:12px">单个文件上限 50MB · 图片/PDF 可在线预览</span>
+  </form>
+  {{else}}<div class="muted" style="font-size:12px;margin-top:8px">登录后可上传附件</div>{{end}}
+</div>
+{{end}}

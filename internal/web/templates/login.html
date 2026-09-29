@@ -1,0 +1,26 @@
+{{define "page"}}
+<div style="max-width:360px;margin:48px auto">
+  <div class="card">
+    <div class="card-head"><h2>管理登录</h2></div>
+    <div class="card-body">
+      {{if .ProtectionOff}}
+      <div class="muted" style="font-size:13px;margin-bottom:12px">
+        当前未配置管理密码（jira_config.json 中 password 为空），所有人默认可编辑。<br>设置 password 后即启用登录保护。
+      </div>
+      {{end}}
+      {{if .LoginError}}<div style="color:var(--danger);font-size:13px;margin-bottom:10px">{{.LoginError}}</div>{{end}}
+      <form method="post" action="/login">
+        <input type="hidden" name="return" value="{{.Return}}">
+        <div class="field">
+          <label>管理密码</label>
+          <input type="password" name="password" autofocus required style="width:100%">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%">登录</button>
+      </form>
+      <div class="muted" style="font-size:12px;margin-top:12px;text-align:center">
+        匿名访问为只读。登录后 30 天内免重新输入。
+      </div>
+    </div>
+  </div>
+</div>
+{{end}}

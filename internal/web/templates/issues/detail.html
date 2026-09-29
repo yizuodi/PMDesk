@@ -1,0 +1,90 @@
+{{define "page"}}
+{{$i := .Issue}}
+<div class="page-head">
+  <div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px">
+      <span class="issue-key">{{$i.Key}}</span>
+      <span class="badge {{statusClass $i.Status}}">{{statusLabel $i.Status}}</span>
+      <span class="badge {{priorityClass $i.Priority}}">{{priorityLabel $i.Priority}}</span>
+      {{template "due_tag" $i.DueDate}}
+    </div>
+    <h1>{{$i.Title}}</h1>
+  </div>
+  <div class="toolbar">
+    {{if .IsAdmin}}<a href="/issues/{{$i.ID}}/edit" class="btn btn-sm">编辑</a>
+    <form method="post" action="/issues/{{$i.ID}}/delete" style="display:inline" onsubmit="return confirm('删除 {{$i.Key}}？')">
+      <button class="btn btn-sm btn-danger">删除</button>
+    </form>{{end}}
+  </div>
+</div>
+
+<div class="detail-grid">
+  <div class="detail-main">
+    <div class="card">
+      <div class="card-head"><h2>描述</h2></div>
+      <div class="card-body">
+        {{if $i.Description}}<div class="markdown-body">{{markdownHTML $i.Description}}</div>{{else}}<div class="muted">暂无描述</div>{{end}}
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="card-head"><h2>评论 ({{len .Comments}})</h2></div>
+      <div class="card-body">
+        <div id="comments">
+          {{range .Comments}}{{template "comment" (dict "C" . "CanDelete" $.IsAdmin)}}{{end}}
+        </div>
+        {{if .IsAdmin}}
+        <form hx-post="/issues/{{$i.ID}}/comments" hx-target="#comments" hx-swap="beforeend"
+              hx-on::after-request="if(event.detail.successful) this.reset()"
+              style="margin-top:12px">
+          <div class="field">
+            <textarea name="body" placeholder="写一条评论…" required style="min-height:80px"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm">添加评论</button>
+        </form>
+        {{else}}<div class="muted" style="font-size:12px;margin-top:8px">登录后可添加评论</div>{{end}}
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="card-head"><h2>附件 ({{len .Attachments}})</h2></div>
+      <div class="card-body">
+        {{template "attachments" (dict "Attachments" .Attachments "IssueID" $i.ID "IsAdmin" .IsAdmin)}}
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card-head"><h2>属性</h2></div>
+      <div class="card-body">
+        <div class="kv"><span class="k">状态</span>
+          {{if .IsAdmin}}
+          <form method="post" action="/issues/{{$i.ID}}/status" style="display:inline">
+            <select name="status" onchange="this.form.submit()">
+              {{range .Statuses}}<option value="{{.}}" {{if eq . $i.Status}}selected{{end}}>{{statusLabel .}}</option>{{end}}
+            </select>
+          </form>
+          {{else}}<span>{{statusLabel $i.Status}}</span>{{end}}
+        </div>
+        <div class="kv"><span class="k">优先级</span><span>{{priorityLabel $i.Priority}}</span></div>
+        <div class="kv"><span class="k">截止</span><span>{{if $i.DueDate}}{{dateFmt $i.DueDate}}{{else}}<span class="muted">无</span>{{end}}</span></div>
+        <div class="kv"><span class="k">创建</span><span class="muted">{{relTime $i.CreatedAt}}</span></div>
+        <div class="kv"><span class="k">更新</span><span class="muted">{{relTime $i.UpdatedAt}}</span></div>
+      </div>
+    </div>
+
+    {{if .Activities}}
+    <div class="card" style="margin-top:16px">
+      <div class="card-head"><h2>变更历史</h2></div>
+      <div class="card-body">
+        {{range .Activities}}<div class="timeline-item">
+          {{activityText .Field .OldValue .NewValue}}
+          <span class="muted"> · {{relTime .CreatedAt}}</span>
+        </div>{{end}}
+      </div>
+    </div>
+    {{end}}
+  </div>
+</div>
+{{end}}

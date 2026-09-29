@@ -1,0 +1,77 @@
+{{define "page"}}
+<div class="page-head">
+  <h1>版本计划</h1>
+  <div class="toolbar">
+    <select class="view-switch" onchange="versionView(this.value)">
+      <option value="group" {{if eq .View "group"}}selected{{end}}>按版本分组</option>
+      <option value="flat" {{if eq .View "flat"}}selected{{end}}>平铺列表</option>
+      <option value="roadmap" {{if eq .View "roadmap"}}selected{{end}}>路线图</option>
+    </select>
+    {{if .IsAdmin}}<a href="/versions/new" class="btn btn-primary btn-sm">+ 新建版本</a>{{end}}
+  </div>
+</div>
+
+<div class="filters">
+  <label>R 版本
+  <select name="r" onchange="go('r', this.value)">
+    <option value="">全部</option>
+    {{range .Rs}}<option value="{{.}}" {{if eq $.FR (printf "%d" .)}}selected{{end}}>R{{printf "%03d" .}}</option>{{end}}
+  </select></label>
+  <label>C 版本
+  <select name="c" onchange="go('c', this.value)">
+    <option value="">全部</option>
+    {{range .Cs}}<option value="{{.}}" {{if eq $.FC (printf "%d" .)}}selected{{end}}>C{{printf "%02d" .}}</option>{{end}}
+  </select></label>
+  <label>类型
+  <select name="type" onchange="go('type', this.value)">
+    <option value="">全部</option>
+    <option value="C" {{if eq .FType "C"}}selected{{end}}>C版本</option>
+    <option value="B" {{if eq .FType "B"}}selected{{end}}>内部B</option>
+    <option value="SPC" {{if eq .FType "SPC"}}selected{{end}}>预发布 SPC</option>
+    <option value="CP" {{if eq .FType "CP"}}selected{{end}}>预发布 CP</option>
+    <option value="KEY" {{if eq .FType "KEY"}}selected{{end}}>关键节点</option>
+  </select></label>
+  <label>状态
+  <select name="status" onchange="go('status', this.value)">
+    <option value="">全部</option>
+    <option value="planned" {{if eq .FStatus "planned"}}selected{{end}}>已计划</option>
+    <option value="active" {{if eq .FStatus "active"}}selected{{end}}>进行中</option>
+    <option value="tested" {{if eq .FStatus "tested"}}selected{{end}}>已转测</option>
+    <option value="released" {{if eq .FStatus "released"}}selected{{end}}>已发布</option>
+  </select></label>
+  <a href="/versions?view=flat" class="btn btn-sm">重置</a>
+</div>
+
+{{if .Versions}}
+<div class="grid grid-2">
+  {{range .Versions}}
+  <div class="card">
+    <div class="card-head">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span class="badge {{vtypeClass .VType}}">{{vtypeLabel .VType}}</span>
+        <a href="/versions/{{.ID}}" style="font-size:16px;font-weight:600">{{.Name}}</a>
+        <span class="badge {{versionStatusClass .Status}}">{{versionStatusLabel .Status}}</span>
+      </div>
+      {{if $.IsAdmin}}<a href="/versions/{{.ID}}/edit" class="btn btn-ghost btn-sm">编辑</a>{{else}}<a href="/versions/{{.ID}}" class="btn btn-ghost btn-sm">查看</a>{{end}}
+    </div>
+    <div class="card-body">
+      {{if (versionParts .)}}<div class="parts" style="margin-bottom:6px">{{versionParts .}}</div>{{end}}
+      {{if .Description}}<div class="muted version-description-summary">{{markdownSummary .Description}}</div>{{end}}
+      <div class="kv"><span class="k">转测日期</span><span>{{if .StartDate}}{{dateFmt .StartDate}}{{else}}<span class="muted">未设定</span>{{end}}</span></div>
+      <div class="kv"><span class="k">发布日期</span><span>{{if .ReleaseDate}}{{dateFmt .ReleaseDate}}{{else}}<span class="muted">未排期</span>{{end}}</span></div>
+    </div>
+  </div>
+  {{end}}
+</div>
+{{else}}
+<div class="card"><div class="empty">没有符合条件的版本。{{if $.IsAdmin}}<a href="/versions/new">新建一个</a>{{end}}</div></div>
+{{end}}
+
+<script>
+function go(key, val){
+  var p = new URLSearchParams(location.search);
+  if (val) p.set(key, val); else p.delete(key);
+  location.search = p.toString();
+}
+</script>
+{{end}}

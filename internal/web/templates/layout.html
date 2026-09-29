@@ -1,0 +1,58 @@
+{{define "layout.html"}}<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{.Title}} · {{.Project.Name}}</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/htmx.min.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">{{.Project.Name}} <span class="brand-key">[{{.Project.Key}}]</span></div>
+  <nav class="nav">
+    <a href="/" class="nav-item {{if eq .Nav "dashboard"}}active{{end}}">仪表盘</a>
+    <a href="/issues" class="nav-item {{if eq .Nav "issues"}}active{{end}}">事务</a>
+    <a href="/board" class="nav-item {{if eq .Nav "board"}}active{{end}}">看板</a>
+    <a href="/versions" class="nav-item {{if eq .Nav "versions"}}active{{end}}">版本</a>
+    {{if .IsAdmin}}<a href="/people" class="nav-item {{if eq .Nav "people"}}active{{end}}">人员速查</a>{{end}}
+    {{range .NavLinks}}{{if eq .Category ""}}
+      {{if eq .Mode "iframe"}}
+      <a href="/nav/{{.ID}}" class="nav-item" title="内嵌：{{.URL}}">🔗 {{.Title}}</a>
+      {{else}}
+      <a href="{{.URL}}" target="_blank" rel="noopener" class="nav-item" title="新窗口打开：{{.URL}}">↗ {{.Title}}</a>
+      {{end}}
+    {{end}}{{end}}
+    {{range .NavCats}}
+    <div class="nav-dropdown">
+      <button class="nav-item nav-cat" type="button">{{.Cat}} <span class="caret">▾</span></button>
+      <div class="nav-submenu">
+        {{range .Links}}
+        {{if eq .Mode "iframe"}}
+        <a href="/nav/{{.ID}}" class="nav-sub-item" title="内嵌：{{.URL}}">{{.Title}}</a>
+        {{else}}
+        <a href="{{.URL}}" target="_blank" rel="noopener" class="nav-sub-item" title="新窗口打开：{{.URL}}">{{.Title}}</a>
+        {{end}}
+        {{end}}
+      </div>
+    </div>
+    {{end}}
+  </nav>
+  <div class="top-actions">
+    {{if .IsAdmin}}
+    <a href="/settings" class="btn btn-sm {{if eq .Nav "settings"}}btn-primary{{end}}">设置</a>
+    <a href="/logout" class="btn btn-sm">退出登录</a>
+    {{else}}
+    <span class="muted" style="font-size:12px">只读模式</span>
+    <a href="/login" class="btn btn-primary btn-sm">登录</a>
+    {{end}}
+  </div>
+</header>
+{{if .Flash}}<div class="flash" id="flash">{{.Flash}}</div>{{end}}
+<main class="container">
+  {{template "page" .}}
+</main>
+<footer class="footer">PM Jira v{{.Version}} · 个人项目管理 · {{.Year}}</footer>
+<script src="/static/app.js"></script>
+</body>
+</html>{{end}}

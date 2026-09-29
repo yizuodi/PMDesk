@@ -1,0 +1,27 @@
+# Binaries
+/pmjira
+/pmjira.exe
+*.exe
+*.db
+*.db-shm
+*.db-wal
+/jira_config.json
+/attachments/
+/*.log
+/coverage.out
+
+# Local secrets and certificates
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+
+# Go
+/vendor/
+
+# OS
+.DS_Store
+Thumbs.db
